@@ -2,6 +2,7 @@ const chessboard = document.getElementById("chessboard");
 const gameStatus = document.getElementById("game-status");
 
 let currentTurn = "white";
+let selectedPiece = null;
 let board = [
   ["r", "n", "b", "q", "k", "b", "n", "r"],
   ["p", "p", "p", "p", "p", "p", "p", "p"],
@@ -28,8 +29,6 @@ const pieces = {
   P: "♙",
 };
 
-let selectedPiece = null;
-
 // Initialize the board
 function initBoard() {
   chessboard.innerHTML = "";
@@ -54,12 +53,17 @@ function initBoard() {
   }
 }
 
+// Handle tile click
 function handleTileClick(row, col) {
+  const piece = board[row][col];
+
   if (selectedPiece) {
     movePiece(selectedPiece.row, selectedPiece.col, row, col);
+    clearHighlights();
     selectedPiece = null;
-  } else if (board[row][col] && isCurrentPlayerPiece(board[row][col])) {
+  } else if (piece && isCurrentPlayerPiece(piece)) {
     selectedPiece = { row, col };
+    highlightAvailableMoves(row, col);
   }
 }
 
@@ -69,6 +73,43 @@ function isCurrentPlayerPiece(piece) {
     (currentTurn === "white" && piece === piece.toUpperCase()) ||
     (currentTurn === "black" && piece === piece.toLowerCase())
   );
+}
+
+// Highlight available moves
+function highlightAvailableMoves(row, col) {
+  clearHighlights();
+  const moves = getAvailableMoves(row, col);
+
+  moves.forEach((move) => {
+    const tile = chessboard.querySelector(
+      `[data-row="${move.row}"][data-col="${move.col}"]`
+    );
+    tile.classList.add("highlight");
+  });
+}
+
+// Get available moves (simplified, only handles pawns)
+function getAvailableMoves(row, col) {
+  const piece = board[row][col];
+  const moves = [];
+
+  // Example: handle pawn movement
+  if (piece === "P") {
+    if (row > 0 && board[row - 1][col] === "") {
+      moves.push({ row: row - 1, col: col });
+    }
+  }
+
+  // Add logic for other pieces here
+
+  return moves;
+}
+
+// Clear highlighted tiles
+function clearHighlights() {
+  document
+    .querySelectorAll(".highlight")
+    .forEach((tile) => tile.classList.remove("highlight"));
 }
 
 function movePiece(startRow, startCol, endRow, endCol) {
