@@ -3,53 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Simple Chess Game" />
-    <title>Chess Game</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f4f4f4;
-        margin: 0;
-      }
-
-      .chessboard {
-        display: grid;
-        grid-template-columns: repeat(8, 60px);
-        grid-template-rows: repeat(8, 60px);
-        gap: 0;
-      }
-
-      .chessboard div {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 32px;
-        cursor: pointer;
-      }
-
-      .white {
-        background-color: #f0d9b5;
-      }
-
-      .black {
-        background-color: #b58863;
-      }
-
-      .chess-piece {
-        font-size: 2em;
-        user-select: none;
-      }
-    </style>
+    <meta name="description" content="Apple-inspired Chess Game" />
+    <title>Apple Chess Game</title>
+    <link rel="stylesheet" href="chess.css" />
   </head>
   <body>
-    <div class="chessboard" id="chessboard"></div>
-
+    <div class="chess-container">
+      <div class="timer">
+        <span id="white-timer">White: 00:00</span>
+        <span id="black-timer">Black: 00:00</span>
+      </div>
+      <div class="chessboard" id="chessboard"></div>
+      <div class="game-status" id="game-status">White to move</div>
+    </div>
     <script src="chess.js"></script>
   </body>
 </html>

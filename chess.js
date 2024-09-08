@@ -1,6 +1,8 @@
 const chessboard = document.getElementById("chessboard");
+const gameStatus = document.getElementById("game-status");
 
-const initialBoard = [
+let currentTurn = "white";
+let board = [
   ["r", "n", "b", "q", "k", "b", "n", "r"],
   ["p", "p", "p", "p", "p", "p", "p", "p"],
   ["", "", "", "", "", "", "", ""],
@@ -11,8 +13,7 @@ const initialBoard = [
   ["R", "N", "B", "Q", "K", "B", "N", "R"],
 ];
 
-// Unicode symbols for chess pieces
-const chessPieces = {
+const pieces = {
   r: "♜",
   n: "♞",
   b: "♝",
@@ -28,108 +29,65 @@ const chessPieces = {
 };
 
 let selectedPiece = null;
-let currentTurn = "white"; // Track player turns (white/black)
-let board = JSON.parse(JSON.stringify(initialBoard)); // Copy of the board
 
-// Render the chessboard
-function renderBoard() {
+// Initialize the board
+function initBoard() {
   chessboard.innerHTML = "";
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
-      const square = document.createElement("div");
-      square.className = (row + col) % 2 === 0 ? "white" : "black";
-      square.dataset.row = row;
-      square.dataset.col = col;
+      const tile = document.createElement("div");
+      tile.classList.add((row + col) % 2 === 0 ? "white-tile" : "black-tile");
+      tile.dataset.row = row;
+      tile.dataset.col = col;
 
       const piece = board[row][col];
       if (piece) {
-        square.innerHTML = `<span class="chess-piece">${chessPieces[piece]}</span>`;
+        const pieceElem = document.createElement("span");
+        pieceElem.classList.add("chess-piece");
+        pieceElem.textContent = pieces[piece];
+        tile.appendChild(pieceElem);
       }
 
-      square.addEventListener("click", () => onSquareClick(row, col));
-      chessboard.appendChild(square);
+      tile.addEventListener("click", () => handleTileClick(row, col));
+      chessboard.appendChild(tile);
     }
   }
 }
 
-// Handle piece selection and movement
-function onSquareClick(row, col) {
-  const piece = board[row][col];
-
+function handleTileClick(row, col) {
   if (selectedPiece) {
-    // Try to move the selected piece to this square
-    if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
-      board[row][col] = board[selectedPiece.row][selectedPiece.col];
-      board[selectedPiece.row][selectedPiece.col] = "";
-      currentTurn = currentTurn === "white" ? "black" : "white"; // Switch turns
-      selectedPiece = null;
-      renderBoard();
-    } else {
-      selectedPiece = null; // Deselect
-    }
-  } else if (piece && isCorrectTurn(piece)) {
+    movePiece(selectedPiece.row, selectedPiece.col, row, col);
+    selectedPiece = null;
+  } else if (board[row][col] && isCurrentPlayerPiece(board[row][col])) {
     selectedPiece = { row, col };
   }
 }
 
-// Ensure only the correct player's pieces can be moved
-function isCorrectTurn(piece) {
+// Check if the piece belongs to the current player
+function isCurrentPlayerPiece(piece) {
   return (
     (currentTurn === "white" && piece === piece.toUpperCase()) ||
     (currentTurn === "black" && piece === piece.toLowerCase())
   );
 }
 
-// Check if a move is valid (basic movement logic, no check/checkmate yet)
-function isValidMove(startRow, startCol, endRow, endCol) {
-  const piece = board[startRow][startCol];
-  const target = board[endRow][endCol];
-
-  // Prevent moving to a square occupied by your own piece
-  if (
-    (piece === piece.toUpperCase() && target === target.toUpperCase()) ||
-    (piece === piece.toLowerCase() && target === target.toLowerCase())
-  ) {
-    return false;
+function movePiece(startRow, startCol, endRow, endCol) {
+  if (isValidMove(startRow, startCol, endRow, endCol)) {
+    board[endRow][endCol] = board[startRow][startCol];
+    board[startRow][startCol] = "";
+    currentTurn = currentTurn === "white" ? "black" : "white";
+    gameStatus.textContent = `${capitalize(currentTurn)} to move`;
+    initBoard();
   }
-
-  // Basic movement rules (only pawn logic implemented here as an example)
-  if (piece.toLowerCase() === "p") {
-    const direction = piece === "P" ? -1 : 1; // White moves up, black moves down
-
-    // Pawn moves forward one square
-    if (
-      endCol === startCol &&
-      board[endRow][endCol] === "" &&
-      endRow === startRow + direction
-    ) {
-      return true;
-    }
-
-    // Pawn captures diagonally
-    if (
-      Math.abs(endCol - startCol) === 1 &&
-      endRow === startRow + direction &&
-      board[endRow][endCol]
-    ) {
-      return true;
-    }
-
-    // Double move for pawns on the starting row
-    if (
-      endCol === startCol &&
-      board[endRow][endCol] === "" &&
-      startRow === (piece === "P" ? 6 : 1) &&
-      endRow === startRow + direction * 2
-    ) {
-      return true;
-    }
-  }
-
-  // Add logic for other pieces (knight, rook, bishop, queen, king)
-  // ...
-
-  return false;
 }
 
-renderBoard();
+function isValidMove(startRow, startCol, endRow, endCol) {
+  // Implement full chess rules here (piece-specific movement)
+  return true;
+}
+
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+initBoard();
